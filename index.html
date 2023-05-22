@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
+    <script
+    src="https://kit.fontawesome.com/e0bb259c63.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+
+<body>
+  <div id="AgregarCancion">
+    <h2 class="pt-3"><i class="fa-solid fa-music px-2"></i>Mi repertorio <i class="fa-solid fa-music"></i></h2>
+
+    <div class="container pt-5 w-50">
+      <div>
+        <div class="form-group row">
+          <label for="name" class="col-sm-2 col-form-label">Canción:</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="cancion" value="Starry night" />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="email" class="col-sm-2 col-form-label">Artista: </label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="artista" value="Don McLean" />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="rut" class="col-sm-2 col-form-label">Año:</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="agno" value="1969" />
+          </div>
+        </div>
+        <button onclick="nuevaCancion()" id="agregar" class="m-auto btn btn-success">
+          Agregar
+        </button>
+        <button onclick="editarCancion()" id="editar" class="m-auto btn btn-info" style="display: none;">
+          Actualizar
+        </button>
+        <button onclick="ocultarMostarBoton()" id="actualizar" class="m-auto btn btn-info" style="display: none;">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="ListaCanciones">
+    <hr />
+    <hr />
+    <h2>Tabla de canciones 🎙️</h2>
+
+    <div class="container pt-5 w-75">
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Canción</th>
+            <th scope="col">Artista</th>
+            <th scope="col">Año</th>
+            <th scope="col">-</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo"></tbody>
+      </table>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</body>
+
+</html>
+
+<style>
+  body {
+    text-align: center;
+    background: #283593;
+    color: white;
+  }
+</style>
+
+<script>
+  let url = "/canciones";
+  let tbody = document.getElementById("cuerpo");
+  let cancion = document.getElementById("cancion");
+  let artista = document.getElementById("artista");
+  let agno = document.getElementById("agno");
+
+  let canciones = [];
+  window.onload = getData();  
+
+  async function getData() {
+
+    await axios.get(url).then((data) => {      
+      canciones = data.data;
+      tbody.innerHTML = "";          
+      canciones.forEach((c, i) => {
+        tbody.innerHTML += `
+        <tr >
+          <td>${i + 1}</td>
+          <td class="text-left">${c.titulo}</td>
+          <td class="text-left">${c.artista}</td>
+          <td>${c.agno}</td>
+          <td>
+            <button class="btn btn-warning btn-sm" onclick="prepararCancion(${i},'${c.id
+          }')">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarCancion(${i},'${c.id
+          }')">Eliminar</button>
+          </td>
+        </tr>
+      `;
+      });
+    });
+    cancion.value = "";
+    artista.value = "";
+    agno.value = "";
+  }
+
+  function nuevaCancion() {
+    
+    cancion;
+    artista;
+    agno;
+    const id = Math.floor(Math.random() * 9999)
+    let data = {
+      id,
+      titulo: cancion.value,
+      artista: artista.value,
+      agno: agno.value,
+    };
+    
+    if(validarCancion())
+      axios.post(url, data).then(() => getData()).catch((error)=>{console.log("error:" + error);});
+    else
+      alert("Debe ingresar todos los datos");
+  }
+
+  function eliminarCancion(i, id) {
+    result = window.confirm(`La canción '${canciones[i].titulo}' de ${canciones[i].artista} se quitara del catalogo`) 
+    if(result)   
+    {
+      axios.delete(url + "/" + id).then(() => {
+      alert("Canción " + canciones[i].titulo + " eliminada");
+      getData();
+    });
+    }      
+    
+  }
+
+  function prepararCancion(i, id) {
+    
+    cancion.value = canciones[i].titulo;
+    artista.value = canciones[i].artista;
+    agno.value = canciones[i].agno;
+    document
+      .getElementById("editar")
+      .setAttribute("onclick", `editarCancion('${id}')`);
+    document.getElementById("agregar").style.display = "none";
+    document.getElementById("editar").style.display = "inline";
+    document.getElementById("actualizar").style.display = "inline";
+    window.scrollTo(0, 0)
+  }
+
+  function editarCancion(id) {    
+    axios
+      .put(url + "/" + id, {
+        id,
+        titulo: cancion.value,
+        artista: artista.value,
+        agno: agno.value,
+      })
+      .then(() => {
+        getData();
+        document.getElementById("agregar").style.display = "block";
+        document.getElementById("agregar").value = "block";
+        document.getElementById("editar").style.display = "none";
+        document.getElementById("actualizar").style.display = "none";
+      });
+  }
+
+  const validarCancion=()=>{        
+    if(cancion.value==='' || artista.value === '' ||  agno.value === '')
+        return false;
+
+    return true
+      
+  }
+
+  const ocultarMostarBoton =()=>{    
+    document.getElementById("editar").style.display = "none";
+    document.getElementById("actualizar").style.display = "none";
+    document.getElementById("agregar").style.display = "block";
+    document.getElementById("agregar").value = "block";
+    cancion.value='';
+    artista.value='';
+    agno.value='';    
+  }  
+</script>

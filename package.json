@@ -1,0 +1,21 @@
+{
+  "name": "repertorio",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "express": "^4.18.2",
+    "mssql": "^9.1.1",
+    "nodemon": "^2.0.22"
+  },
+  "puerto": "5000",
+  "usuario": "sa",
+  "password": "dasein",
+  "description": ""
+}
